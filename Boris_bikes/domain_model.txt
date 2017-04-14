@@ -1,7 +1,15 @@
-Objects            Messages
-Person
-Bike               is_it_working?
-Docking Station    release_bike
 
+  |      Objects      |     Messages     |
+  |                   |                  |
+  | Person            |                  |
+  |                   |                  |
+  | Bike              | is_it_working?   |
+  |                   |                  |
+  | Docking Station   | release_bike     |
+  |                   |                  |
+  ||||||||||||||||||||||||||||||||||||||||
+
+
+Diagram//
 bike => is_it_working? = yes/no
-docking station => realease_bike => bike
+docking station => release_bike => bike
