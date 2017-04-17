@@ -14,4 +14,8 @@ class Oystercard
     @balance += n
   end
 
+  def deduct(m)
+    @balance -= m
+  end
+
 end
