@@ -1,55 +1,59 @@
 require 'oystercard'
 
 describe Oystercard do
+let(:card) { Oystercard.new }
+before do
+@min = Oystercard::MIN_FUNDS
+end
+  it { is_expected.to respond_to(:balance) }
 
-  it 'checks the cards balance' do
-    expect(subject.balance).not_to eq nil
+  it 'initializes with a balance of zero' do
+    expect(card.balance).to eq 0
   end
+
+  it { is_expected.to respond_to(:top_up).with(1).argument }
 
   describe '#top_up' do
-    it { is_expected.to respond_to(:top_up).with(1).argument }
-    it 'tops up your balance' do
-      expect { subject.top_up 5 }.to change { subject.balance }.by 5
+    it 'tops up balance by specified amount' do
+      subject.top_up(15)
+      expect(subject.balance).to eq 15
     end
-    it 'raises an error when cleartrying to exceed max balance' do
-      message = 'That exceeds the maximum balance'
-      subject.top_up(Oystercard::MAX_BALANCE)
-      expect { subject.top_up 1 }.to raise_error message
+end
+    it 'raises an error if top-up would push balance above £90' do
+      expect{ subject.top_up(100) }.to raise_error "Top-up would exceed £#{Oystercard::DEFAULT_LIMIT} limit"
     end
+
+
+
+describe '#touch_in' do
+
+  it 'touches in' do
+    card.top_up(@min); card.touch_in
+    expect(card).to be_in_journey
   end
 
-  describe '#deduct' do
-    it 'deducts fare from balance' do
-      expect { subject.deduct 5 }.to change { subject.balance }.by -5
-    end
+  it 'raises an error when insufficient funds' do
+    expect { card.touch_in }.to raise_error 'Insuficient funds'
+  end
+end
+
+describe '#touch_out' do
+
+  it 'touches out' do
+    card.top_up(@min); card.touch_in; card.touch_out
+    expect(card).not_to be_in_journey
   end
 
-  describe '#in_journey?' do
-    it 'starts as not in journey'do
-      expect(subject).to_not be_in_journey
-    end
+  it 'charges minimum fare' do
+  card.top_up(10); card.touch_in
+  expect{ card.touch_out }.to change{ card.balance }.by -Oystercard::FARE
   end
+end
 
-  describe '#touch_in' do
-    it { is_expected.to respond_to(:touch_in) }
-    it "loggs when touched in" do
-      subject.touch_in
-      expect(subject).to be_in_journey
-    end
+describe '#in_journey?' do
 
-
-    it 'raises error when balance insuficient' do
-      expect{ subject.touch_in }.to raise_error 'Insufficient funds'
-    end
+  it 'checks the journey status' do
+    expect(card.in_journey?).to eq(true).or(eq(false))
   end
-
-
-  describe '#touch_out' do
-    it { is_expected.to respond_to(:touch_out) }
-    it 'loggs when touched out' do
-      subject.touch_in
-      subject.touch_out
-      expect(subject).to_not be_in_journey
-    end
-  end
+end
 end
