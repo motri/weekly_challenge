@@ -1,34 +1,37 @@
 class Oystercard
-
-  MAX_BALANCE = 99
-
-  attr_reader :balance
+  attr_reader :balance, :in_journey
+  DEFAULT_LIMIT = 90
+  MIN_FUNDS = 1
+  FARE = 1
 
   def initialize
     @balance = 0
-    @status = false
+    @in_journey = false
   end
 
-  def top_up(n)
-    raise 'That exceeds the maximum balance' if
-    (balance + n) > MAX_BALANCE
-    @balance += n
-  end
-
-  def deduct(m)
-    @balance -= m
-  end
-
-  def in_journey?
-    @status
+  def top_up(amount)
+    fail "Top-up would exceed £#{DEFAULT_LIMIT} limit" if @balance + amount > DEFAULT_LIMIT
+    @balance += amount
   end
 
   def touch_in
-    @status = true
+    fail 'Insuficient funds' if @balance < MIN_FUNDS
+    @in_journey = true
   end
 
   def touch_out
-    @status = false
+    @in_journey = false
+    spend(FARE)
+  end
+
+  def in_journey?
+    @in_journey
+  end
+
+  private
+
+  def spend(amount)
+    @balance -= amount
   end
 
 end
