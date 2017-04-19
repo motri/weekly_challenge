@@ -23,29 +23,34 @@ end
       expect{ subject.top_up(100) }.to raise_error "Top-up would exceed £#{Oystercard::DEFAULT_LIMIT} limit"
     end
 
-
-
 describe '#touch_in' do
 
+  station = "abbeywood"
+
   it 'touches in' do
-    card.top_up(@min); card.touch_in
+    card.top_up(@min); card.touch_in(station)
     expect(card).to be_in_journey
   end
 
   it 'raises an error when insufficient funds' do
-    expect { card.touch_in }.to raise_error 'Insuficient funds'
+    expect { card.touch_in(station) }.to raise_error 'Insuficient funds'
+  end
+
+  it 'remembers the station' do
+    card.top_up(@min); card.touch_in(station)
+    expect(card.logg).to include(station)
   end
 end
 
 describe '#touch_out' do
-
+station = "station"
   it 'touches out' do
-    card.top_up(@min); card.touch_in; card.touch_out
+    card.top_up(@min); card.touch_in(station); card.touch_out
     expect(card).not_to be_in_journey
   end
 
   it 'charges minimum fare' do
-  card.top_up(10); card.touch_in
+  card.top_up(10); card.touch_in(station)
   expect{ card.touch_out }.to change{ card.balance }.by -Oystercard::FARE
   end
 end
