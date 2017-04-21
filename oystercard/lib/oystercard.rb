@@ -1,54 +1,45 @@
+require_relative 'journey'
+
 class Oystercard
-  attr_reader :balance, :in_journey, :entry_station, :exit_station, :history
+  attr_reader :balance
+  attr_accessor :trip, :entry_station, :exit_station
 
   DEFAULT_LIMIT = 90
   MIN_FUNDS = 1
   FARE = 1
 
-
   def initialize
     @balance = 0
-    @in_journey = false
-    @entry_station = nil
-    @exit_station = nil
-    @journey = {}
-    @history = []
-
+    @trip = Journey.new
   end
 
   def top_up(amount)
-    fail "Top-up would exceed £#{DEFAULT_LIMIT} limit" if @balance + amount > DEFAULT_LIMIT
-    @balance += amount
+    @increase = amount
+    raise "Top-up would exceed £#{DEFAULT_LIMIT} limit" if overlimit
+    @balance += @increase
   end
 
   def touch_in(station)
-    fail 'Insuficient funds' if @balance < MIN_FUNDS
-    @in_journey = true
-    @entry_station = station
+    raise 'Insuficient funds' if @balance < MIN_FUNDS
+    @trip.start(station)
   end
 
   def touch_out(station)
-    @in_journey = false
+    penalty if !@trip.in_journey?
     spend(FARE)
-    @exit_station = station
-    tracker
+    @trip.end(station)
   end
 
-  def in_journey?
-    @in_journey
+  def overlimit
+    @balance + @increase > DEFAULT_LIMIT
   end
-
-  def tracker
-    @journey[@entry_station] = @exit_station
-    @history << @journey
-    @entry_station = nil
+  
+  def penalty
+    spend(6); fail 'You did not touch in'
   end
-
-
   private
 
   def spend(amount)
     @balance -= amount
   end
-
 end
